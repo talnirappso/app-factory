@@ -1,0 +1,315 @@
+{
+  "linear": {
+    "pollSeconds": 60,
+    "teams": {
+      "ideas": {
+        "key": "PUC",
+        "name": "New apps",
+        "states": [
+          {
+            "name": "Ideation",
+            "renameFrom": "Backlog",
+            "type": "backlog",
+            "position": 0,
+            "color": "#95a2b3",
+            "description": "Ideas from the nightly scouts and from you. Full card in the description. Comment to discuss; Claude replies."
+          },
+          {
+            "name": "Research",
+            "type": "unstarted",
+            "position": 1,
+            "color": "#4ea7fc",
+            "description": "Move here for a deep research pass (stores, demand, name/trademark, sources, 4.3(a) concept test). Comes back to Ideation with a scorecard, or Parked."
+          },
+          {
+            "name": "Implement",
+            "renameFrom": "Todo",
+            "type": "unstarted",
+            "position": 2,
+            "color": "#f2c94c",
+            "description": "Move here to build it. This is your approval to ship to the App Store and Google Play: research \u2192 concept \u2192 fresh Expo app \u2192 tests \u2192 device test \u2192 both stores."
+          },
+          {
+            "name": "Building",
+            "renameFrom": "In Progress",
+            "type": "started",
+            "position": 3,
+            "color": "#f2994a",
+            "description": "The pipeline is running. Each phase is a comment."
+          },
+          {
+            "name": "Needs you",
+            "type": "started",
+            "position": 4,
+            "color": "#eb5757",
+            "description": "Paused on something only you can do or decide (console-only steps, a kill verdict, a rejection). Read the last comment, do it or answer, then move back to Building."
+          },
+          {
+            "name": "Store review",
+            "type": "started",
+            "position": 5,
+            "color": "#bb87fc",
+            "description": "Submitted to App Review / Play review. Watched automatically; goes Live or back to Needs you."
+          },
+          {
+            "name": "Live",
+            "renameFrom": "Done",
+            "type": "completed",
+            "position": 6,
+            "color": "#4cb782",
+            "description": "Live on both stores."
+          },
+          {
+            "name": "Parked",
+            "renameFrom": "Canceled",
+            "type": "canceled",
+            "position": 7,
+            "color": "#95a2b3",
+            "description": "Not now. Say why in a comment; the scouts won't re-propose it."
+          }
+        ],
+        "labels": [
+          {
+            "name": "idea",
+            "color": "#5e6ad2",
+            "description": "A new-app idea card"
+          },
+          {
+            "name": "reddit",
+            "color": "#ff4500",
+            "description": "Found by the Reddit pain scout"
+          },
+          {
+            "name": "store gap",
+            "color": "#0f9d58",
+            "description": "Found by the App Store / Play gap scout"
+          },
+          {
+            "name": "idea queue",
+            "color": "#95a2b3",
+            "description": "From new-app-docs/IDEAS.md"
+          },
+          {
+            "name": "your idea",
+            "color": "#f2c94c",
+            "description": "Created by you; Claude fleshes it out"
+          },
+          {
+            "name": "researched",
+            "color": "#4ea7fc",
+            "description": "Has a research scorecard"
+          }
+        ]
+      },
+      "apps": {
+        "key": "APP",
+        "name": "Apps & tasks",
+        "states": [
+          {
+            "name": "Inbox",
+            "renameFrom": "Backlog",
+            "type": "backlog",
+            "position": 0,
+            "color": "#95a2b3",
+            "description": "Anything for Claude on the home box: a bug/feature for a live app (label it keytora/translex/mathworks \u2192 its nightly agent does it), or any other job (set up a nightly workflow for another app, an audit, infra, docs \u2192 Claude runs it directly). Claude replies with a plan."
+          },
+          {
+            "name": "Ready",
+            "renameFrom": "Queued",
+            "type": "unstarted",
+            "position": 1,
+            "color": "#f2c94c",
+            "description": "Move here to go. App-labelled issues are queued for that app's nightly agent (keytora 03:00, TransLex 04:00, MathWorks Sun 05:00; add the label `now` to run it immediately instead). Everything else runs right away as an unattended agent on the home box."
+          },
+          {
+            "name": "Running",
+            "renameFrom": "Tonight",
+            "type": "started",
+            "position": 2,
+            "color": "#f2994a",
+            "description": "Being executed (now, or by tonight's nightly run). The result lands here as a comment."
+          },
+          {
+            "name": "Needs you",
+            "type": "started",
+            "position": 3,
+            "color": "#eb5757",
+            "description": "Claude needs a decision or something only you can do. Answer in a comment, then move back to Running."
+          },
+          {
+            "name": "Done",
+            "renameFrom": "Shipped",
+            "type": "completed",
+            "position": 4,
+            "color": "#4cb782"
+          },
+          {
+            "name": "Won't do",
+            "type": "canceled",
+            "position": 5,
+            "color": "#95a2b3"
+          }
+        ],
+        "labels": [
+          {
+            "name": "app request",
+            "color": "#bb87fc",
+            "description": "A change to an existing app, handed to its nightly agent"
+          },
+          {
+            "name": "keytora",
+            "color": "#26b5ce"
+          },
+          {
+            "name": "translex",
+            "color": "#26b5ce"
+          },
+          {
+            "name": "mathworks",
+            "color": "#26b5ce"
+          },
+          {
+            "name": "question",
+            "color": "#4ea7fc",
+            "description": "Just a question about an app; answered in a comment, nothing built"
+          },
+          {
+            "name": "workflow",
+            "color": "#5e6ad2",
+            "description": "Nightly-agent / CI / automation setup"
+          },
+          {
+            "name": "infra",
+            "color": "#26b5ce"
+          },
+          {
+            "name": "audit",
+            "color": "#4ea7fc"
+          },
+          {
+            "name": "docs",
+            "color": "#95a2b3"
+          },
+          {
+            "name": "now",
+            "color": "#eb5757",
+            "description": "Run this app issue immediately as a task instead of waiting for the nightly agent"
+          }
+        ]
+      }
+    }
+  },
+  "scouts": {
+    "redditState": "~/git/reddit-scout/data/state.json",
+    "storeState": "~/git/reddit-scout/data/store-state.json",
+    "ideasFile": "~/git/new-app-docs/IDEAS.md",
+    "minSignal": "moderate",
+    "maxPerTick": 3
+  },
+  "docs": [
+    "~/git/new-app-docs/README.md",
+    "~/git/new-app-docs/RESEARCH.md",
+    "~/git/new-app-docs/IDEAS.md",
+    "~/git/new-app-docs/BUILD-GUIDE.md",
+    "~/git/new-app-docs/GOTCHAS.md",
+    "~/git/new-app-docs/reddit/LEADS.md",
+    "~/git/new-app-docs/store-gaps/GAPS.md"
+  ],
+  "claude": {
+    "bin": "~/.local/bin/claude",
+    "model": "claude-opus-5-5",
+    "effort": "high"
+  },
+  "respond": {
+    "budgetUsd": 3,
+    "timeoutMin": 12
+  },
+  "research": {
+    "budgetUsd": 25,
+    "timeoutMin": 90
+  },
+  "pipeline": {
+    "reposDir": "~/git",
+    "device": "4730a660",
+    "totalBudgetUsd": 400,
+    "phases": {
+      "research": {
+        "budgetUsd": 25,
+        "timeoutMin": 90
+      },
+      "scaffold": {
+        "budgetUsd": 40,
+        "timeoutMin": 150
+      },
+      "features": {
+        "budgetUsd": 80,
+        "timeoutMin": 240
+      },
+      "review": {
+        "budgetUsd": 15,
+        "timeoutMin": 30
+      },
+      "fix": {
+        "budgetUsd": 30,
+        "timeoutMin": 90
+      },
+      "assets": {
+        "budgetUsd": 30,
+        "timeoutMin": 120
+      },
+      "android": {
+        "budgetUsd": 30,
+        "timeoutMin": 180
+      },
+      "ios": {
+        "budgetUsd": 30,
+        "timeoutMin": 180
+      },
+      "stores": {
+        "budgetUsd": 30,
+        "timeoutMin": 150
+      },
+      "submit": {
+        "budgetUsd": 15,
+        "timeoutMin": 60
+      }
+    },
+    "gates": {
+      "forbidden_patterns": [
+        "nervex",
+        "github\\.com/talnirapps/",
+        "Smart Serve",
+        "Serving It Right",
+        "ProServe"
+      ]
+    }
+  },
+  "nightlyAgents": {
+    "keytora": {
+      "dataDir": "~/git/keytora/infra/nightly-agent/data",
+      "repo": "~/git/keytora",
+      "when": "every night at 03:00"
+    },
+    "translex": {
+      "dataDir": "~/git/TransLex/infra/nightly-agent/data",
+      "repo": "~/git/TransLex",
+      "when": "every night at 04:00"
+    },
+    "mathworks": {
+      "dataDir": "~/git/MathWorks/infra/nightly-agent/data",
+      "repo": "~/git/MathWorks",
+      "when": "Sundays at 05:00 (TestFlight only)"
+    }
+  },
+  "enrich": {
+    "budgetUsd": 4,
+    "timeoutMin": 15
+  },
+  "storeCheckMinutes": 30,
+  "tasks": {
+    "budgetUsd": 60,
+    "timeoutMin": 180,
+    "triageBudgetUsd": 4,
+    "triageTimeoutMin": 12
+  }
+}

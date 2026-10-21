@@ -1,0 +1,10 @@
+# Phase: submit — App Review and Play production
+
+The owner's Implement move is the approval for this app (board rule). Final checks first, then submit; if any check fails → `blocked`, never a half-submission.
+
+1. Re-read `{{WORK_DIR}}/research.md`'s name/trademark section and `docs/concept.md`; grep the repo, listing and review notes for the banned terms and "official"/"endorsed". Confirm `verify-ad-ids` passed for both artifacts (facts), the privacy page is live, the ASC version has the build attached and no missing metadata, Play content declarations are done (`play_content_done`) — otherwise `blocked` with what's missing.
+2. **App Store:** create the review submission for version 1.0.0 (`reviewSubmissions` + `reviewSubmissionItems` + submit; `~/git/common/nightly-agent/scripts/asc_submit.py --app <asc_app_id>` does this for the nightly agents — read it and reuse). Manual release is fine. Record `asc_submission` = "1.0.0 build N WAITING_FOR_REVIEW".
+3. **Play:** promote internal → production: `python3 ~/git/common/nightly-agent/scripts/play.py promote --package {{BUNDLE}} --sa secrets/play-service-account.json --from internal --to production --expect-version 1.0.0`. Exit 3 = the SA lacks "Release to production" → not a failure of yours: record `play_release` = "internal complete; production needs the console grant" and add a `needs_you` line with the exact click (Users & permissions → SA → app → Release to production), then continue.
+4. Update `~/git/CLAUDE.md` (new project entry, terse, in the existing style), `{{DOCS_DIR}}/RESEARCH.md` (built row) and `IDEAS.md`; commit those docs repos if they are git repos (new-app-docs is). Append the AdMob "Add store" + app-ads.txt reminder to `needs_you` for after the apps are live.
+
+Facts: `asc_submission`, `play_release`, `submitted_at`.

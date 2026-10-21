@@ -1,0 +1,18 @@
+[Unit]
+Description=app-factory — Linear bridge (idea cards, comment replies, build pipeline launcher)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/git/app-factory
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node bin/bridge.mjs
+Restart=always
+RestartSec=30
+# A tick that hangs (Claude call) must not block forever; the loop itself has per-call timeouts.
+TimeoutStopSec=60
+
+[Install]
+WantedBy=default.target

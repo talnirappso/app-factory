@@ -1,0 +1,16 @@
+{
+  "name": "app-factory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Linear board ↔ nightly scouts ↔ unattended Expo app builds to the App Store and Google Play",
+  "scripts": {
+    "setup": "node bin/setup.mjs",
+    "bridge": "node bin/bridge.mjs",
+    "once": "node bin/bridge.mjs --once",
+    "dry": "node bin/bridge.mjs --dry-run",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=22" },
+  "license": "MIT"
+}

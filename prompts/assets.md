@@ -1,0 +1,9 @@
+# Phase: legal page, icon, screenshots, listing texts, privacy declarations
+
+1. **Legal page** (BUILD-GUIDE §7): `~/git/common/legal-site/{{SLUG}}/index.html` (privacy policy naming AdMob/UMP/ATT, support email talnirapps@gmail.com, no affiliation with any regulator; add the `<li>` in the site index), deploy with `npx wrangler pages deploy . --project-name=talnirapps-legal`, verify the `<title>` with curl (200 alone proves nothing). Facts `privacy_url`.
+2. **Icon + splash + feature graphic** generated from the app's palette and symbol (`scripts/make-assets.py` with Pillow). Commit.
+3. **Screenshots** showing the **core tool** (not a quiz): `npx expo export --platform web` + the `app-store-screenshots` skill for raw captures (metro web stubs for native-only modules as the skill describes), then the `store-marketing-screenshots` skill (shotforge) for 6.9"/6.5" iPhone sets and Play phone + feature graphic, benefit-led captions, EN (+FR if the jurisdiction is Quebec). Output under `store/screenshots/`.
+4. **Listing texts** in `store/listing.md`: name, subtitle (iOS, ≤30), short description (Play, ≤80), full description, keywords (≤100 chars), what's new, review notes (what it's for, independent, no certificate issued, where ads appear, UMP only in EEA/UK), category, age rating answers (all 21 fields, `advertising: true`), content rating answers for Play, data-safety answers. Record `store/asc-privacy.json` (App Privacy: identifiers + usage data via third-party ads SDK).
+5. Store scripts under `scripts/`: copy foodprep's `asc.py`, `asc_listing.py`, `asc_release.py`, `asc_screenshots.py` and edit ids/paths for this app (these are tooling, fine to copy). Don't run them yet if the ASC record doesn't exist (check `GET /v1/apps?filter[bundleId]={{BUNDLE}}`; record `asc_app_id` in facts when it does).
+
+Keep the tree clean and pushed. Facts: `privacy_url`, `screenshots_dir`, `listing_file`, `asc_app_id` (if known).
