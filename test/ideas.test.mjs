@@ -36,12 +36,12 @@ test('selectNewCards skips posted and weak, strongest first', () => {
 });
 
 test('renderCard includes every template section and the logo', () => {
-  const card = { app_name: 'Tide Keeper', alt_names: ['Tidewise'], tagline: 'tides for small boats', summary: 's', pain: 'p', audience: 'a', opportunity: 'o',
+  const card = { app_name: 'Tide Keeper', alt_names: ['Tidewise'], tagline: 'tides for small boats', summary: 's', pain: 'p', audience: 'a', market: 'US', upside: '$5k/mo', opportunity: 'o',
     demand_evidence: [{ fact: 'f', source: 'https://x' }], platforms: 'both', tech_stack: 'Expo SDK 56', core_features: [{ name: 'Log', what: 'w', why_core: 'y' }],
     competitors: [{ name: 'Tides', store: 'both', traction: '1M', gap: 'ads', url: 'https://u' }], monetization: 'ads', revenue_guess: 'CA$5', build_size: 'M — maps', risks: ['4.3(a)'],
     logo_prompt: 'x', logo_colors: '#000 #fff', verdict: 'build', why_verdict: 'because', next_step: 'n', open_questions: ['q'] };
   const md = renderCard(card, { logoUrl: 'https://logo', source: 'test', key: 'k', date: '2026-10-21' });
-  for (const h of ['## What it is', '## The pain', '## Who it is for', '## The opportunity', '## Demand evidence', '## Core features', '## Competitors', '## Platforms', '## Tech stack', '## Monetization', '## Build size', '## Risks', '## Names', '## Open questions', '## Next step']) assert.ok(md.includes(h), h);
+  for (const h of ['## What it is', '## The pain', '## Who it is for', '## Market and upside', '## The opportunity', '## Demand evidence', '## Core features', '## Competitors', '## Platforms', '## Tech stack', '## Monetization', '## Build size', '## Risks', '## Names', '## Open questions', '## Next step']) assert.ok(md.includes(h), h);
   assert.ok(md.startsWith('![logo](https://logo)'));
   assert.ok(md.includes('[Tides](https://u)'));
 });
