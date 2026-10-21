@@ -111,7 +111,7 @@
             "type": "backlog",
             "position": 0,
             "color": "#95a2b3",
-            "description": "Anything for Claude on the home box: a bug/feature for a live app (label it keytora/translex/mathworks \u2192 its nightly agent does it), or any other job (set up a nightly workflow for another app, an audit, infra, docs \u2192 Claude runs it directly). Claude replies with a plan."
+            "description": "A bug/feature for a live app (label keytora/translex/mathworks \u2192 its nightly agent) or any other job for Claude on the home box (workflows, audits, infra, docs). Claude replies with a plan."
           },
           {
             "name": "Ready",
@@ -119,7 +119,7 @@
             "type": "unstarted",
             "position": 1,
             "color": "#f2c94c",
-            "description": "Move here to go. App-labelled issues are queued for that app's nightly agent (keytora 03:00, TransLex 04:00, MathWorks Sun 05:00; add the label `now` to run it immediately instead). Everything else runs right away as an unattended agent on the home box."
+            "description": "Move here to go. App-labelled issues wait for that app's nightly agent (add the label `now` to run immediately); everything else runs right away as an unattended agent."
           },
           {
             "name": "Running",
@@ -204,7 +204,8 @@
     "storeState": "~/git/reddit-scout/data/store-state.json",
     "ideasFile": "~/git/new-app-docs/IDEAS.md",
     "minSignal": "moderate",
-    "maxPerTick": 3
+    "maxPerTick": 3,
+    "maxPerDay": 8
   },
   "docs": [
     "~/git/new-app-docs/README.md",

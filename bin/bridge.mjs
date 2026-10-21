@@ -76,7 +76,9 @@ async function syncIdeas() {
   if (ss) for (const g of Object.values(ss.gaps || {})) cards.push({ ...cardFromGap(g), raw: g });
   const ideasMd = home(cfg.scouts.ideasFile);
   if (existsSync(ideasMd)) for (const c of cardsFromIdeasMd(readFileSync(ideasMd, 'utf8'))) cards.push({ ...c, raw: c.description });
-  const fresh = selectNewCards(cards, state.ideas, { minSignal: cfg.scouts.minSignal }).slice(0, cfg.scouts.maxPerTick || 3);
+  const postedToday = Object.values(state.ideas).filter((i) => (i.postedAt || '').startsWith(new Date().toISOString().slice(0, 10))).length;
+  const room = Math.max(0, (cfg.scouts.maxPerDay || 8) - postedToday);
+  const fresh = selectNewCards(cards, state.ideas, { minSignal: cfg.scouts.minSignal }).slice(0, Math.min(cfg.scouts.maxPerTick || 3, room));
   if (!fresh.length) return;
   log(`${fresh.length} new finding(s) to post (${cards.length} known)`);
   for (const c of fresh) {
