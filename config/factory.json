@@ -219,7 +219,7 @@
   "claude": {
     "bin": "~/.local/bin/claude",
     "model": "claude-opus-5-5",
-    "effort": "high"
+    "effort": "medium"
   },
   "respond": {
     "budgetUsd": 3,
