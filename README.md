@@ -12,9 +12,9 @@ Zero npm dependencies. Node ≥ 22. Runs as a systemd **user** service on the ho
 |---|---|---|
 | **Ideation** | the bridge (scouts) or you | Every strong/moderate finding of the Reddit pain scout, the store-gap scout and the ranked queue in `new-app-docs/IDEAS.md` becomes a card with the full template (below). Ideas you type yourself get the same treatment. Comment → Claude answers. |
 | **Research** | you | A ~1 h headless research pass (both stores, demand, name/trademark, sources, the 4.3(a) concept test). Scorecard is appended to the card; it goes back to **Ideation** with the `researched` label, or to **Parked** on a kill. |
-| **Implement** | you | **This is your approval to ship.** The pipeline runs: research → scaffold → features → review → assets → Android (incl. the OnePlus 6 test) → iOS → store listings → submit. Each phase posts a comment. |
+| **Implement** | you | **This is your approval to ship.** The pipeline runs: research → scaffold → features → review → assets → **console** → Android (incl. the OnePlus 6 test) → iOS → store listings → submit. Each phase posts a comment. |
 | **Building** | the bridge | Pipeline running. Move a card here from **Needs you** to resume. |
-| **Needs you** | the pipeline | Paused on something only you can do (console-only steps: ASC app record, Play app record + content declarations, AdMob apps/units) or decide (a kill verdict, a store rejection). Read the last comment, answer in the thread (ids, "done", "go anyway"), then move back to **Building**. |
+| **Needs you** | the pipeline | Paused on something only you can do (a console step the `console` phase couldn't finish, e.g. Chrome logged out) or decide (a kill verdict, a store rejection). Read the last comment, answer in the thread (ids, "done", "go anyway"), then move back to **Building**. |
 | **Store review** | the pipeline | Submitted. Checked every 30 min; → **Live** when both stores are live, → **Needs you** on a rejection. |
 | **Live** / **Parked** | | |
 
@@ -34,7 +34,7 @@ Proposed app name (≤30 chars, store rules) + alternates · generated logo conc
 - `bin/bridge.mjs` — the loop (every 60 s): `syncIdeas` (scout state files → cards via one Claude "enrich" call + a Pollinations/monogram logo uploaded to Linear), `pollIssues` (new issues, state moves), `pollComments` (reply with Claude; actions: move, update card, set title, record facts, resume), `pollPipelines` (restart dead units, watch store review), `pollNightlyResults` (apps board).
 - `bin/pipeline.mjs <issueId>` — one app: phases in `prompts/*.md`, each a headless `claude -p` (Opus 5.5, high, full tools, no prompts) in its own session with budget + timeout, a result file contract (`ok | blocked | failed | kill`, summary, facts, needs_you), deterministic gates after code phases (`npm test`, `tsc`, `expo export`, forbidden strings, clean + pushed), one fix round per failure, an independent read-only review phase. Launched as a transient unit `app-factory-puc-N` with `systemd-run`, so it outlives the bridge. State in `data/pipelines/PUC-N/`.
 - Owner answers on the board become **facts** (`facts.json`) that later phases read: AdMob ids, "ASC record created", "go anyway", etc.
-- Console-only steps (the APIs 403 for app-record and ad-unit creation) are posted as a checklist as soon as the name is fixed, so you can do them on your phone while the build continues; the pipeline blocks only when it actually needs their output.
+- Console-only records (the APIs 403/404 for app-record and ad-unit creation) are made by the `console` phase, the only phase given a browser: the Playwright extension MCP attached to the owner's logged-in Chrome (talnirapps@gmail.com). It creates the Play app + App content + the service account's per-app grant (testing tracks, store presence, draft apps — production stays manual), the AdMob apps/units + GDPR-message row, and the ASC app record, and writes the ids to facts. If a console is logged out it lands in **Needs you** with the exact steps; do them, paste the ids, move back to **Building**.
 
 ## Commands
 
@@ -61,4 +61,4 @@ Enrich ≈ $1–4 per card; a reply ≈ $0.5–3; research ≈ $10–25; a full 
 
 ## Not automated (by design or by API limits)
 
-Creating the ASC app record, the Play app record and its content declarations, AdMob apps/units/GDPR row, and Play "Release to production" for a service account without the grant. The pipeline tells you exactly what to type and waits.
+Play "Release to production" (the service account has no production grant by design) and anything behind a console login that has lapsed. Store records are browser-automated by the `console` phase, so Chrome must stay logged in as talnirapps@gmail.com with the Playwright extension installed.
