@@ -48,7 +48,8 @@ const CODE_PHASES = new Set(['scaffold', 'features', 'assets', 'android', 'ios',
 // records the APIs can't create (Play app + declarations + SA grant, AdMob apps/units/GDPR row, ASC app record).
 // Without PLAYWRIGHT_MCP_EXTENSION_TOKEN the extension waits for a click on its "connect" page (interactive shells get it
 // from ~/.zshrc; this systemd unit doesn't), so it comes from secrets/ and goes in via the env, not the command line.
-const BROWSER_PHASES = { console: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension'], env: {} } } };
+// --output-dir keeps the MCP's snapshots/console logs out of the app repo (cwd), where they'd dirty the tree.
+const BROWSER_PHASES = { console: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension', '--output-dir', join(DIR, 'playwright')], env: {} } } };
 const TOKEN_FILE = join(ROOT, 'secrets/playwright_extension_token');
 const browserToken = () => process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN || (existsSync(TOKEN_FILE) ? readFileSync(TOKEN_FILE, 'utf8').trim() : '');
 const mode = ONLY ? 'research' : 'full';

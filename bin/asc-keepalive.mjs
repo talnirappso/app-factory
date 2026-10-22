@@ -28,7 +28,7 @@ const prompt = `Keep the owner's App Store Connect session alive. You have the P
 ${signin}`;
 const SCHEMA = { type: 'object', additionalProperties: false, required: ['status', 'detail'], properties: { status: { type: 'string', enum: ['signed_in', 'needs_owner'] }, detail: { type: 'string' } } };
 const r = await runClaude({ ...cfg.claude, prompt, mode: 'agent', jsonSchema: SCHEMA, budgetUsd: 3, timeoutMs: 30 * 60_000, cwd: ROOT,
-  mcpServers: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension'], env: {} } }, env: { PLAYWRIGHT_MCP_EXTENSION_TOKEN: token } });
+  mcpServers: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension', '--output-dir', join(ROOT, 'data/playwright')], env: {} } }, env: { PLAYWRIGHT_MCP_EXTENSION_TOKEN: token } });
 const out = r.structured || { status: 'needs_owner', detail: `agent failed (${r.timedOut ? 'timeout' : `exit ${r.code}`})` };
 log(`${out.status}: ${out.detail} ($${(r.costUsd || 0).toFixed(2)})`);
 writeFileSync(join(ROOT, 'data/asc-session.json'), JSON.stringify({ at: new Date().toISOString(), ...out }, null, 2));
