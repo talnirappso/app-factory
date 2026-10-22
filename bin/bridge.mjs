@@ -247,7 +247,7 @@ async function onStateChange(issue, board, st, rec) {
       await launchPipeline(ROOT, issue, { only: 'research' }, log);
     } else if (st === 'Implement') {
       if (unitActive(issue)) return;
-      await move(issue, board, 'Building', '🏗️ Build started. Phases: research → scaffold → features → review → assets → Android (incl. the OnePlus 6 test) → iOS → store listings → submit. Each phase posts here. Anything only you can do (console-only steps) comes as a checklist; the build keeps going until it truly needs it.');
+      await move(issue, board, 'Building', '🏗️ Build started. Phases: research → scaffold → features → review → assets → console records (Play, AdMob, App Store Connect, in your logged-in Chrome) → Android (incl. the OnePlus 6 test) → iOS → store listings → submit. Each phase posts here. Anything only you can do (console-only steps) comes as a checklist; the build keeps going until it truly needs it.');
       await launchPipeline(ROOT, issue, {}, log);
       rec.lastStateSeen = 'Building';
     } else if (st === 'Building') {

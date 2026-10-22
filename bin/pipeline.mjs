@@ -42,8 +42,11 @@ const STATE = join(DIR, 'state.json');
 const FACTS = join(DIR, 'facts.json');
 const facts = () => loadJson(FACTS, {});
 
-export const PHASES = ['research', 'scaffold', 'features', 'review', 'assets', 'android', 'ios', 'stores', 'submit'];
+export const PHASES = ['research', 'scaffold', 'features', 'review', 'assets', 'console', 'android', 'ios', 'stores', 'submit'];
 const CODE_PHASES = new Set(['scaffold', 'features', 'assets', 'android', 'ios', 'stores', 'submit']);
+// The only phase with a browser: the owner's logged-in Chrome via the Playwright extension, for the store/AdMob
+// records the APIs can't create (Play app + declarations + SA grant, AdMob apps/units/GDPR row, ASC app record).
+const BROWSER_PHASES = { console: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension'], env: {} } } };
 const mode = ONLY ? 'research' : 'full';
 const phasesToRun = ONLY ? [ONLY] : PHASES;
 
@@ -95,7 +98,7 @@ function readResult(name) {
   } catch (e) { return { status: 'failed', summary: `${f} is not valid JSON: ${e.message}` }; }
 }
 
-async function runAgent(name, prompt, { readonly = false, session, resume = false, budgetKey = name } = {}) {
+async function runAgent(name, prompt, { readonly = false, session, resume = false, budgetKey = name, mcpServers } = {}) {
   const f = facts();
   const cwd = f.repo && existsSync(home(f.repo)) ? home(f.repo) : DIR;
   const p = cfg.pipeline.phases[budgetKey] || { budgetUsd: 30, timeoutMin: 120 };
@@ -103,7 +106,7 @@ async function runAgent(name, prompt, { readonly = false, session, resume = fals
   log(`claude ${readonly ? 'readonly' : 'agent'} for ${name} (cwd ${cwd}, budget $${p.budgetUsd}, ${p.timeoutMin} min)`);
   const r = await runClaude({ ...cfg.claude, prompt, mode: readonly ? 'readonly' : 'agent', cwd,
     addDirs: [DIR, home('~/git/new-app-docs'), home('~/git/common'), home('~/git/lingopath'), home('~/git/reddit-scout'), home('~/git/app-factory')],
-    budgetUsd: p.budgetUsd, timeoutMs: p.timeoutMin * 60_000, sessionId: session, resume });
+    budgetUsd: p.budgetUsd, timeoutMs: p.timeoutMin * 60_000, sessionId: session, resume, mcpServers });
   writeFileSync(join(DIR, `${name}-result.md`), r.result || '');
   ps.totalCost += r.costUsd || 0; saveState();
   log(`claude ${name}: exit ${r.code}${r.timedOut ? ' TIMEOUT' : ''}, $${(r.costUsd || 0).toFixed(2)}, ${min(r.ms)} min, ${r.turns} turns`);
@@ -189,7 +192,7 @@ async function runPhase(name) {
       else { rv = await reviewPhase(); result = blocking(rv).length ? { status: 'failed', summary: `still ${blocking(rv).length} blocking finding(s) after one fix round: ${blocking(rv).map((q) => q.summary).join(' | ')}` } : { status: 'ok', summary: `review verdict ${rv.verdict} after fixes: ${rv.summary}` }; }
     } else result = { status: 'ok', summary: `review verdict **${rv.verdict}**: ${rv.summary}${rv.findings?.length ? `\n${rv.findings.slice(0, 5).map((q) => `- ${q.severity}: ${q.summary}`).join('\n')}` : ''}` };
   } else {
-    const r = await runAgent(name, phasePrompt(name));
+    const r = await runAgent(name, phasePrompt(name), { mcpServers: BROWSER_PHASES[name] });
     result = readResult(name);
     if (result.facts && typeof result.facts === 'object') mergeFacts(ROOT, issue, result.facts);
     if (result.status === 'ok' && CODE_PHASES.has(name)) {
@@ -215,7 +218,10 @@ async function runPhase(name) {
 
 async function main() {
   log(`=== pipeline ${issue.identifier} "${issue.title}" mode=${mode} from=${ps.phase} resume=${RESUME} ===`);
-  const start = Math.max(0, phasesToRun.indexOf(ps.phase));
+  let start = Math.max(0, phasesToRun.indexOf(ps.phase));
+  // A pipeline started before the console phase existed (or resumed past it) still needs its records made.
+  const ci = phasesToRun.indexOf('console');
+  if (ci >= 0 && start > ci && ps.phases.console?.status !== 'ok' && !facts().admob_android_app_id) { log('console phase never ran — running it first'); start = ci; }
   for (const name of phasesToRun.slice(start)) {
     if (ps.phases[name]?.status === 'ok' && (RESUME || FROM)) { log(`${name}: already ok, skipping`); continue; }
     const r = await runPhase(name);

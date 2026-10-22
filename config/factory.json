@@ -258,6 +258,7 @@
         "budgetUsd": 30,
         "timeoutMin": 120
       },
+      "console": { "budgetUsd": 30, "timeoutMin": 120 },
       "android": {
         "budgetUsd": 30,
         "timeoutMin": 180
