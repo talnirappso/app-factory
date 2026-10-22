@@ -46,7 +46,11 @@ export const PHASES = ['research', 'scaffold', 'features', 'review', 'assets', '
 const CODE_PHASES = new Set(['scaffold', 'features', 'assets', 'android', 'ios', 'stores', 'submit']);
 // The only phase with a browser: the owner's logged-in Chrome via the Playwright extension, for the store/AdMob
 // records the APIs can't create (Play app + declarations + SA grant, AdMob apps/units/GDPR row, ASC app record).
+// Without PLAYWRIGHT_MCP_EXTENSION_TOKEN the extension waits for a click on its "connect" page (interactive shells get it
+// from ~/.zshrc; this systemd unit doesn't), so it comes from secrets/ and goes in via the env, not the command line.
 const BROWSER_PHASES = { console: { playwright: { type: 'stdio', command: 'npx', args: ['@playwright/mcp@latest', '--extension'], env: {} } } };
+const TOKEN_FILE = join(ROOT, 'secrets/playwright_extension_token');
+const browserToken = () => process.env.PLAYWRIGHT_MCP_EXTENSION_TOKEN || (existsSync(TOKEN_FILE) ? readFileSync(TOKEN_FILE, 'utf8').trim() : '');
 const mode = ONLY ? 'research' : 'full';
 const phasesToRun = ONLY ? [ONLY] : PHASES;
 
@@ -99,6 +103,7 @@ function readResult(name) {
 }
 
 async function runAgent(name, prompt, { readonly = false, session, resume = false, budgetKey = name, mcpServers } = {}) {
+  const env = mcpServers ? { PLAYWRIGHT_MCP_EXTENSION_TOKEN: browserToken() } : {};
   const f = facts();
   const cwd = f.repo && existsSync(home(f.repo)) ? home(f.repo) : DIR;
   const p = cfg.pipeline.phases[budgetKey] || { budgetUsd: 30, timeoutMin: 120 };
@@ -106,7 +111,7 @@ async function runAgent(name, prompt, { readonly = false, session, resume = fals
   log(`claude ${readonly ? 'readonly' : 'agent'} for ${name} (cwd ${cwd}, budget $${p.budgetUsd}, ${p.timeoutMin} min)`);
   const r = await runClaude({ ...cfg.claude, prompt, mode: readonly ? 'readonly' : 'agent', cwd,
     addDirs: [DIR, home('~/git/new-app-docs'), home('~/git/common'), home('~/git/lingopath'), home('~/git/reddit-scout'), home('~/git/app-factory')],
-    budgetUsd: p.budgetUsd, timeoutMs: p.timeoutMin * 60_000, sessionId: session, resume, mcpServers });
+    budgetUsd: p.budgetUsd, timeoutMs: p.timeoutMin * 60_000, sessionId: session, resume, mcpServers, env });
   writeFileSync(join(DIR, `${name}-result.md`), r.result || '');
   ps.totalCost += r.costUsd || 0; saveState();
   log(`claude ${name}: exit ${r.code}${r.timedOut ? ' TIMEOUT' : ''}, $${(r.costUsd || 0).toFixed(2)}, ${min(r.ms)} min, ${r.turns} turns`);
@@ -191,6 +196,8 @@ async function runPhase(name) {
       if (!g.ok) { result = { status: 'failed', summary: `gates failed after the review fix round:\n${g.problems.join('\n')}` }; }
       else { rv = await reviewPhase(); result = blocking(rv).length ? { status: 'failed', summary: `still ${blocking(rv).length} blocking finding(s) after one fix round: ${blocking(rv).map((q) => q.summary).join(' | ')}` } : { status: 'ok', summary: `review verdict ${rv.verdict} after fixes: ${rv.summary}` }; }
     } else result = { status: 'ok', summary: `review verdict **${rv.verdict}**: ${rv.summary}${rv.findings?.length ? `\n${rv.findings.slice(0, 5).map((q) => `- ${q.severity}: ${q.summary}`).join('\n')}` : ''}` };
+  } else if (BROWSER_PHASES[name] && !browserToken()) {
+    result = { status: 'blocked', summary: 'The browser phase has no Playwright extension token, so it would hang on the extension\'s connect page.', blocked_on: `Put the token from the Playwright MCP Bridge extension's options page in ${TOKEN_FILE} (mode 0400), then move the card back to Building.` };
   } else {
     const r = await runAgent(name, phasePrompt(name), { mcpServers: BROWSER_PHASES[name] });
     result = readResult(name);
