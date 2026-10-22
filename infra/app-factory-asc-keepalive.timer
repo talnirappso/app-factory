@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily App Store Connect session keepalive (09:30, when the owner can answer a 2FA code)
+
+[Timer]
+OnCalendar=*-*-* 09:30
+Persistent=true
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

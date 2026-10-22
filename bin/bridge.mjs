@@ -185,6 +185,7 @@ async function pollComments() {
   for (const c of all) {
     if (c.user?.id === lin.me.id) continue; // my own replies
     if (/^\s*>\s*_?\(no reply\)/i.test(c.body) || /^\s*\/quiet\b/i.test(c.body)) continue;
+    if (/^\s*\d{3}\s?\d{3}\s*$/.test(c.body) || /Apple sent a 6-digit|Got the code, signing in|No code arrived in time/.test(c.body)) continue; // Apple 2FA relay (bin/apple-2fa-code.mjs)
     byIssue.set(c.issue.id, c);
   }
   for (const [issueId, last] of byIssue) {
@@ -223,6 +224,7 @@ async function pollIssues() {
     if (!known) {
       // Created by the owner (the bridge registers its own issues when it creates them).
       if (issue.creator?.id === lin.me.id && !issue.description) continue;
+      if (/^Apple sign-in code needed/.test(issue.title)) continue; // opened by bin/apple-2fa-code.mjs
       log(`new ${board} issue ${issue.identifier} "${issue.title}" in ${st}`);
       if (DRY) continue;
       if (board === 'ideas' && !rec.enriched && ['Ideation', 'Research', 'Implement'].includes(st)) await enrichOwnIdea(issue).catch((e) => log(`  enrich failed: ${e.message}`));

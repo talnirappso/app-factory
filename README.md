@@ -62,3 +62,11 @@ Enrich ≈ $1–4 per card; a reply ≈ $0.5–3; research ≈ $10–25; a full 
 ## Not automated (by design or by API limits)
 
 Play "Release to production" (the service account has no production grant by design) and anything behind a console login that has lapsed. Store records are browser-automated by the `console` phase, so Chrome must stay logged in as talnirapps@gmail.com with the Playwright extension installed.
+
+## App Store Connect sign-in (no owner step per app)
+
+Apple has no API to create an app record, so the `console` phase uses the owner's Chrome. To keep that unattended:
+- `bin/set-apple-login.sh` (run once, by the owner) stores the Apple ID in `secrets/apple_login.json` (0400).
+- When ASC shows the sign-in page, the agent signs in by `prompts/apple-signin.md` and ticks **Trust** (~30 days without new codes).
+- If Apple asks for a 2FA code, `bin/apple-2fa-code.mjs` posts to Slack + the card and waits 15 min for a reply with the code (the bridge ignores those comments).
+- `app-factory-asc-keepalive.timer` (daily 09:30) opens ASC so the trusted session stays fresh and signs in again when it lapsed; Slack only when it needs the owner. Last result: `data/asc-session.json`.

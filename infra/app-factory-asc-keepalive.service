@@ -1,0 +1,9 @@
+[Unit]
+Description=app-factory — keep the App Store Connect session in Chrome alive (signs in again when lapsed)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/git/app-factory
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/node %h/git/app-factory/bin/asc-keepalive.mjs
+TimeoutStartSec=40min

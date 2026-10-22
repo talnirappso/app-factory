@@ -10,7 +10,7 @@ Values come from facts and the repo: name `{{NAME}}` (fallbacks: `alt_names` in 
 
 - One Chrome extension relay serves every Claude session. If tabs die with "Target page, context or browser has been closed" every minute or two, other sessions' `@playwright/mcp --extension` servers are fighting for it: find yours via the parent chain (`pgrep -P <your claude pid>`), `kill -STOP` the **others'** `node …playwright…--extension` PIDs, do the work, and **always `kill -CONT` them before you finish** (also on failure). A single "closed" error after idle: retry once.
 - Open your own tab; don't close or navigate the owner's tabs.
-- If a console shows a login / account chooser / 2FA prompt instead of the app, don't type passwords: stop that store, put "log Chrome in to <console> as talnirapps@gmail.com" in `needs_you`, and carry on with the others.
+- **App Store Connect signed out:** sign in yourself by `~/git/app-factory/prompts/apple-signin.md` (read it first; `{{CODE_ISSUE_ARG}}` there is `--issue={{IDENTIFIER}}`). Google consoles: if one shows a login / account chooser / 2FA prompt instead of the app, don't type a Google password: stop that store, put "log Chrome in to <console> as talnirapps@gmail.com" in `needs_you`, and carry on with the others.
 - Accept only what this app needs: Play's developer declarations for creating the app (the owner approved this in the plan), App content answers from `store/listing.md`. **Never** submit for review, send changes for review, publish to any track, roll out production, change pricing to paid, accept new agreements/terms beyond the create-app declarations, or touch another app.
 
 ## 1. Google Play
@@ -28,7 +28,7 @@ Values come from facts and the repo: name `{{NAME}}` (fallbacks: `alt_names` in 
 
 ## 3. App Store Connect
 
-Apps → "+" (a menu) → New App: iOS, name `{{NAME}}` (if taken, the fallbacks in order), primary language English (Canada), bundle `{{BUNDLE}}` (already registered), SKU `{{SLUG}}`, Full access → Create. Confirm by API and record `asc_app_id`. If the ASC login blocks you, that's a `needs_you`, not a failure of the phase.
+Apps → "+" (a menu) → New App: iOS, name `{{NAME}}` (if taken, the fallbacks in order), primary language English (Canada), bundle `{{BUNDLE}}` (already registered), SKU `{{SLUG}}`, Full access → Create. Confirm by API and record `asc_app_id`. If ASC is signed out, sign in per `apple-signin.md` first; only what that file says to stop on is a `needs_you` (not a failure of the phase).
 
 ## Result
 
