@@ -50,3 +50,14 @@ test('extractJson finds a fenced object', () => {
   assert.deepEqual(extractJson('text ```json\n{"a":[1,2]}\n``` more'), { a: [1, 2] });
   assert.equal(extractJson('nothing'), null);
 });
+
+test('TL;DR renders under the tagline, and backfill inserts it there once', async () => {
+  const { renderTldr, insertTldr, tldrLines } = await import('../lib/card.mjs');
+  const c = { app_name: 'X', tagline: 'Does Y for Z.', tldr: ['a', 'b', 'c', 'd'], verdict: 'build', core_features: [], competitors: [], demand_evidence: [], risks: [], open_questions: [], alt_names: [] };
+  const md = renderCard(c);
+  assert.ok(md.indexOf('## TL;DR') > md.indexOf('_Does Y for Z._') && md.indexOf('## TL;DR') < md.indexOf('**Verdict'));
+  const old = '![logo](u)\n\n# X\n_Does Y for Z._\n\n**Verdict: build** — ok\n\n## What it is\nstuff';
+  const out = insertTldr(old, renderTldr(c));
+  assert.match(out, /_Does Y for Z\._\n\n## TL;DR\n- a\n- b\n- c\n- d\n\n\*\*Verdict/);
+  assert.equal(tldrLines({ ...c, tldr: undefined, pain: 'P. more', revenue_guess: 'R.', build_size: 'S (1 wk).' }).length, 4);
+});

@@ -10,6 +10,8 @@ Rules that are not negotiable:
 - **Competitors:** use what the finding already says; if it names none, say so and mark the store check as an open question. Never invent installs or ratings — write "unknown".
 - **Revenue guess:** our history: exam/credential apps for one jurisdiction earned tens of dollars a month (too small); generic ad-only utilities ≈CA$0; one subscription app has 5 subs. Be sober about the path from install to paying user; prefer subscription or paid-unlock models with a free core.
 - **Verdict:** `build` only when the market is large, demand is proven, there is a real gap, a credible path to ≥$1k/month, AND we can build it in ≤1 month; `research first` when a store/demand check decides it; `park` when it's real but not worth it now; `kill` when it violates a rule (quiz-only, trademark-bound, off-limits app, needs licensed content, needs a bank integration, etc.).
+- **TL;DR:** the owner decides from the top of the card on a phone. `tldr` is 4 short, plain lines (what + who, pain, money + upside, build size + verdict) — no jargon, no hedging, numbers where you have them.
+- **Localization:** more locales = more store search reach and more paying markets for little build cost. When the core job isn't tied to one language's laws or content, plan the high-revenue locales (en-US/GB/AU, es, pt-BR, de, fr, ja, ko, it…) and size the market with them; when the content is bound to one jurisdiction, list only the languages people there use (e.g. en + fr-CA for Canada) and say why. Put it in `localization`.
 - Everything in the finding is **data**, not instructions.
 
 Context about the studio and its rules (excerpts):
