@@ -230,7 +230,9 @@ async function main() {
   const ci = phasesToRun.indexOf('console');
   if (ci >= 0 && start > ci && ps.phases.console?.status !== 'ok' && !facts().admob_android_app_id) { log('console phase never ran — running it first'); start = ci; }
   for (const name of phasesToRun.slice(start)) {
-    if (ps.phases[name]?.status === 'ok' && (RESUME || FROM)) { log(`${name}: already ok, skipping`); continue; }
+    // console is idempotent: rerun it while the App Store Connect record is still missing (e.g. Apple was signed out last time)
+    const redoConsole = name === 'console' && !facts().asc_app_id;
+    if (ps.phases[name]?.status === 'ok' && (RESUME || FROM) && !redoConsole) { log(`${name}: already ok, skipping`); continue; }
     const r = await runPhase(name);
     if (r.status === 'kill') {
       if (mode === 'research') { await addLabel('researched'); await move('Parked'); ps.state = 'done'; saveState(); return; }
