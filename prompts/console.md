@@ -30,6 +30,11 @@ Values come from facts and the repo: name `{{NAME}}` (fallbacks: `alt_names` in 
 
 Apps → "+" (a menu) → New App: iOS, name `{{NAME}}` (if taken, the fallbacks in order), primary language English (Canada), bundle `{{BUNDLE}}` (already registered), SKU `{{SLUG}}`, Full access → Create. Confirm by API and record `asc_app_id`. If ASC is signed out, sign in per `apple-signin.md` first; only what that file says to stop on is a `needs_you` (not a failure of the phase).
 
+## 4. Browser-only store settings
+
+- **ASC App Privacy** (no REST API — every path 404s): Termkeep-style answers live in `{{REPO}}/store/asc-privacy.json` (written by the assets phase). App Store Connect → the app → App Privacy → Get Started / Edit: Data collected = Yes, tick exactly the data types in that file, and for each one set linked-to-user, tracking and purposes as the file says → Save → **Publish**. Reload and check the published summary matches. Facts: `asc_privacy_published: true`. If the file is missing, put the exact answers needed in `needs_you`.
+- **Play store settings** (the API can't set the category): Play Console → the app → Store settings (Grow → Store presence → Store settings) → App category: App + the category from `store/listing.md`; contact email talnirapps@gmail.com; website = privacy URL → Save. Facts: `play_store_settings: "done"`.
+
 ## Result
 
 - `ok` when Play (app + SA grant) and AdMob (8 ids + GDPR row) are done and verified — Android can proceed. ASC/app-content leftovers go in `needs_you` with exact steps (the iOS/stores phases block on them later).

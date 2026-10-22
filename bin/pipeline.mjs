@@ -223,6 +223,10 @@ async function runPhase(name) {
   return result;
 }
 
+// Browser-only records/settings the console phase owns; any still missing → console reruns.
+const consoleTodo = () => { const f = facts(); return !f.asc_app_id || !f.asc_privacy_published || !f.play_store_settings; };
+let consoleRetried = false;
+
 async function main() {
   log(`=== pipeline ${issue.identifier} "${issue.title}" mode=${mode} from=${ps.phase} resume=${RESUME} ===`);
   let start = Math.max(0, phasesToRun.indexOf(ps.phase));
@@ -230,10 +234,18 @@ async function main() {
   const ci = phasesToRun.indexOf('console');
   if (ci >= 0 && start > ci && ps.phases.console?.status !== 'ok' && !facts().admob_android_app_id) { log('console phase never ran — running it first'); start = ci; }
   for (const name of phasesToRun.slice(start)) {
-    // console is idempotent: rerun it while the App Store Connect record is still missing (e.g. Apple was signed out last time)
-    const redoConsole = name === 'console' && !facts().asc_app_id;
+    // console is idempotent: rerun it while any browser-only record/setting is still missing (e.g. Apple was signed out last time)
+    const redoConsole = name === 'console' && consoleTodo();
     if (ps.phases[name]?.status === 'ok' && (RESUME || FROM) && !redoConsole) { log(`${name}: already ok, skipping`); continue; }
-    const r = await runPhase(name);
+    let r = await runPhase(name);
+    // A later phase blocked on browser-only work (App Privacy, Play category, a missing record): that's the console
+    // phase's job, not the owner's — run it once, then retry this phase.
+    if (r.status === 'blocked' && phasesToRun.indexOf(name) > ci && consoleTodo() && !consoleRetried) {
+      consoleRetried = true;
+      log(`${name}: blocked on browser-only work → console phase, then ${name} again`);
+      const c = await runPhase('console');
+      if (c.status === 'ok') r = await runPhase(name);
+    }
     if (r.status === 'kill') {
       if (mode === 'research') { await addLabel('researched'); await move('Parked'); ps.state = 'done'; saveState(); return; }
       ps.state = 'paused'; ps.blockedOn = `research verdict: kill — ${r.summary.split('\n')[0]}`; saveState();
