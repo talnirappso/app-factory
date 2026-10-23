@@ -137,6 +137,12 @@ async function gates(name) {
   if (pats) await check('forbidden strings', `! git grep -nIiE '${pats}' -- . ':!package-lock.json' ':!*.lock' || (echo 'forbidden pattern present'; exit 1)`, 2);
   await check('git clean', 'test -z "$(git status --porcelain)" || (git status --short; exit 1)', 1);
   await check('pushed', 'git fetch -q origin && test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || (echo "HEAD not pushed to origin/main"; exit 1)', 3);
+  // Past App Store rejections as a gate (4.3(a) code/asset/concept similarity + static lessons). Fast part only —
+  // the Claude concept review and the store search run in the submit phase. Owner overrides: facts.presubmit_accept.
+  if (name !== 'scaffold') {
+    const accept = Object.entries(f.presubmit_accept || {}).map(([k, v]) => `--accept ${JSON.stringify(`${k}=${v}`)}`).join(' ');
+    await check('presubmit (past rejections)', `python3 /home/puca1/git/common/presubmit/presubmit.py . --no-llm --no-stores --no-refresh --json ${JSON.stringify(join(DIR, `presubmit-${name}.json`))} ${accept}`, 15);
+  }
   if (name !== 'scaffold') await check('no UIBackgroundModes', `! grep -q UIBackgroundModes app.json || (echo 'UIBackgroundModes in app.json'; exit 1)`, 1);
   writeFileSync(join(DIR, `gates-${name}.json`), JSON.stringify(out, null, 2));
   return out;
