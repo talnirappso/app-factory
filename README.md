@@ -51,7 +51,7 @@ journalctl --user -u app-factory-puc-7 -f                              # one bui
 
 ## Setup
 
-1. Personal API key in Linear (Settings → Security & access → Personal API keys), **created while signed in as talnirapps@gmail.com** (the bot identity) → `secrets/linear_api_key` (chmod 0400). The owner works the boards as **talnir81@gmail.com**: the bridge answers every comment not written by the key's user, so the owner must never comment as talnirapps (those comments are treated as the bot's own and ignored). Slack webhook (optional) → `secrets/slack_webhook_url`.
+1. Personal API key in Linear (Settings → Security & access → Personal API keys), **created while signed in as talnirapps@gmail.com** (the bot identity) → `secrets/linear_api_key` (chmod 0400). The owner works the boards as **talnir81@gmail.com** (`linear.owner` in `config/factory.json`); cards moved to **Needs you** or **Store review** are assigned to that user so Linear pushes a notification: the bridge answers every comment not written by the key's user, so the owner must never comment as talnirapps (those comments are treated as the bot's own and ignored). Slack webhook (optional) → `secrets/slack_webhook_url`.
 2. `config/factory.json`: team keys, states, scouts' state files, Claude model/budgets, device serial, nightly-agent data dirs.
 3. `infra/install.sh` (needs `loginctl enable-linger`).
 

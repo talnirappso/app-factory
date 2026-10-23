@@ -65,7 +65,7 @@ saveState();
 
 const stateId = (name) => IDEAS.states[name];
 const comment = (body) => L.createComment(issue.id, body).catch((e) => log(`comment failed: ${e.message}`));
-const move = async (name) => { await L.updateIssue(issue.id, { stateId: stateId(name) }).catch((e) => log(`move failed: ${e.message}`)); log(`→ ${name}`); };
+const move = async (name) => { await L.moveIssue(issue.id, stateId(name), name, cfg.linear.owner).catch((e) => log(`move failed: ${e.message}`)); log(`→ ${name}`); };
 const addLabel = async (name) => {
   const id = lin.labels[name]; if (!id) return;
   const cur = (await L.getIssue(issue.id)).labels.nodes.map((l) => l.id);

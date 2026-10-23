@@ -24,7 +24,7 @@ const DIR = join(ROOT, 'data/tasks', issue.identifier);
 mkdirSync(DIR, { recursive: true });
 const log = (m) => { const line = `${new Date().toISOString()} ${m}`; console.log(line); writeFileSync(join(DIR, 'task.log'), line + '\n', { flag: 'a' }); };
 const comment = (b) => L.createComment(issue.id, b).catch((e) => log(`comment failed: ${e.message}`));
-const move = (name) => L.updateIssue(issue.id, { stateId: T.states[name] }).catch((e) => log(`move failed: ${e.message}`));
+const move = (name) => L.moveIssue(issue.id, T.states[name], name, cfg.linear.owner).catch((e) => log(`move failed: ${e.message}`));
 const st = loadJson(join(DIR, 'state.json'), { runs: 0, totalCost: 0 });
 const resultFile = join(DIR, 'result.json');
 const thread = await L.issueComments(issue.id);

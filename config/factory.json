@@ -1,6 +1,10 @@
 {
   "linear": {
     "pollSeconds": 60,
+    "owner": {
+      "email": "talnir81@gmail.com",
+      "assignOn": ["Needs you", "Store review"]
+    },
     "teams": {
       "ideas": {
         "key": "PUC",

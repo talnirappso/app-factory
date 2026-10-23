@@ -61,7 +61,7 @@ async function comment(issue, body) {
 async function move(issue, board, name, note) {
   log(`move ${issue.identifier} → ${name}`);
   if (DRY) return issue;
-  const upd = await L.updateIssue(issue.id, { stateId: stateId(board, name) });
+  const upd = await L.moveIssue(issue.id, stateId(board, name), name, cfg.linear.owner);
   reg(upd, { lastStateSeen: name });
   if (note) await comment(issue, note);
   return upd;
