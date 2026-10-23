@@ -225,7 +225,7 @@ async function runPhase(name) {
 }
 
 // Browser-only records/settings the console phase owns; any still missing → console reruns.
-const consoleTodo = () => { const f = facts(); return !f.asc_app_id || !f.asc_privacy_published || !f.play_store_settings || (f.ios_build && !f.testflight_testers); };
+const consoleTodo = () => { const f = facts(); return !f.asc_app_id || !f.asc_privacy_published || !f.play_store_settings || (f.ios_build && !f.testflight_testers) || f.play_production === 'needs console'; };
 let consoleRetried = false;
 
 async function main() {

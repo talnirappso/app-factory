@@ -37,6 +37,10 @@ Apps → "+" (a menu) → New App: iOS, name `{{NAME}}` (if taken, the fallbacks
 
 - **TestFlight testers** (only when facts `ios_build` is set and `testflight_testers` isn't): App Store Connect → the app → TestFlight → Internal Testing → `Internal` (create it if missing, "Enable automatic distribution" on) → ＋ Testers → add **talnirapps@gmail.com** and **talnir81@gmail.com**. A tester that isn't in the list must first be a team user: Users and Access → ＋ → that email, role **Developer**, access to this app (or all apps) → Invite — then add them to the group (they get the TestFlight invite once they accept). Check both are listed. Facts: `testflight_testers: "talnirapps@gmail.com, talnir81@gmail.com"` (or say which is pending the Users-and-Access acceptance).
 
+## 5. Play production release (only when facts `play_production` is `"needs console"`)
+
+The owner's Implement move approved shipping this app to production (board rule). Play Console → the app → Test and release → **Production** → Countries/regions: add **all countries** (or what the card says) → Create new release → **Add from library** → the version in facts `android_vc` (1.0.0) → Next → release notes en-CA (one plain sentence naming the core features, from `store/listing.md`) → Save → **Go to overview** / Publishing overview → **Send changes for review** → confirm. Reload Publishing overview and check the production release is "In review" (or "Changes in review"). Never touch another app, pricing, or the internal/testing tracks. If Play shows an unfinished App content item or a policy declaration you don't have the answer for, stop and put it word for word in `needs_you`. Facts: `play_production: "1.0.0 (vc N) sent for review <date>"`.
+
 ## Result
 
 - `ok` when Play (app + SA grant) and AdMob (8 ids + GDPR row) are done and verified — Android can proceed. ASC/app-content leftovers go in `needs_you` with exact steps (the iOS/stores phases block on them later).
