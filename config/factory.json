@@ -102,6 +102,11 @@
             "name": "researched",
             "color": "#4ea7fc",
             "description": "Has a research scorecard"
+          },
+          {
+            "name": "ebook",
+            "color": "#d97706",
+            "description": "A new Kindle ebook idea, not an app. Never starts a build."
           }
         ]
       },
@@ -207,6 +212,8 @@
     "redditState": "~/git/reddit-scout/data/state.json",
     "storeState": "~/git/reddit-scout/data/store-state.json",
     "ideasFile": "~/git/new-app-docs/IDEAS.md",
+    "ebookState": "~/git/reddit-scout/data/ebook-state.json",
+    "ebookMaxPerDay": 3,
     "minSignal": "moderate",
     "maxPerTick": 3,
     "maxPerDay": 8

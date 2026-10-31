@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardFromLead, cardFromGap, cardsFromIdeasMd, selectNewCards } from '../lib/ideas.mjs';
+import { cardFromLead, cardFromGap, cardFromEbook, cardsFromIdeasMd, selectNewCards } from '../lib/ideas.mjs';
+import { isEbook, launchPipeline } from '../lib/pipeline-ctl.mjs';
 import { renderCard } from '../lib/card.mjs';
 import { extractJson } from '../lib/claude.mjs';
 
@@ -60,4 +61,22 @@ test('TL;DR renders under the tagline, and backfill inserts it there once', asyn
   const out = insertTldr(old, renderTldr(c));
   assert.match(out, /_Does Y for Z\._\n\n## TL;DR\n- a\n- b\n- c\n- d\n\n\*\*Verdict/);
   assert.equal(tldrLines({ ...c, tldr: undefined, pain: 'P. more', revenue_guess: 'R.', build_size: 'S (1 wk).' }).length, 4);
+});
+
+test('ebook idea → labelled card that says the pipeline will not run', () => {
+  const c = cardFromEbook({ key: 'grief', title: 'After the Loss', subtitle: 's', signal: 'moderate', verdict: 'write', tldr: ['a'], comparables: [{ title: 'B | C', url: 'https://x', price: '$9', reviews: '100', rank: 'unknown', published: '2024', weakness: 'old' }], demand_evidence: [{ fact: 'f', source: 'https://y' }] });
+  assert.equal(c.key, 'ebook:grief');
+  assert.deepEqual(c.labels, ['ebook']);
+  assert.ok(c.description.includes('[B \\| C](https://x)'));
+  assert.ok(c.description.includes('do not run here'));
+  assert.equal(selectNewCards([c], {}).length, 1);
+  assert.equal(selectNewCards([c], { 'ebook:grief': { identifier: 'PUC-1' } }).length, 0);
+});
+
+test('the app pipeline refuses an ebook card, but tasks still run', async () => {
+  const issue = { id: 'x', identifier: 'PUC-999', labels: { nodes: [{ name: 'ebook' }] } };
+  assert.equal(isEbook(issue), true);
+  assert.equal(isEbook({ labels: { nodes: [{ name: 'idea' }] } }), false);
+  assert.equal(await launchPipeline('/nonexistent', issue, {}, () => {}), false);
+  assert.equal(await launchPipeline('/nonexistent', issue, { only: 'research' }, () => {}), false);
 });

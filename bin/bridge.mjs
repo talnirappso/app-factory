@@ -15,14 +15,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as L from '../lib/linear.mjs';
 import { loadJson, saveJson, emptyState } from '../lib/state.mjs';
-import { cardFromLead, cardFromGap, cardsFromIdeasMd, selectNewCards } from '../lib/ideas.mjs';
+import { cardFromLead, cardFromGap, cardFromEbook, cardsFromIdeasMd, selectNewCards } from '../lib/ideas.mjs';
 import { renderCard } from '../lib/card.mjs';
 import { generateLogo, uploadToLinear } from '../lib/logo.mjs';
 import { enrich, docsContext } from '../lib/enrich.mjs';
 import { respond } from '../lib/respond.mjs';
 import { notifySlack } from '../lib/notify.mjs';
 import { run } from '../lib/sh.mjs';
-import { pipelineStatus, unitName, launchPipeline, unitActive, storeState, pipelineDir, mergeFacts } from '../lib/pipeline-ctl.mjs';
+import { pipelineStatus, unitName, launchPipeline, unitActive, storeState, pipelineDir, mergeFacts, isEbook } from '../lib/pipeline-ctl.mjs';
 import { runClaude } from '../lib/claude.mjs';
 import { fill } from '../lib/enrich.mjs';
 import { renderThread } from '../lib/respond.mjs';
@@ -76,7 +76,7 @@ async function syncIdeas() {
   if (ss) for (const g of Object.values(ss.gaps || {})) cards.push({ ...cardFromGap(g), raw: g });
   const ideasMd = home(cfg.scouts.ideasFile);
   if (existsSync(ideasMd)) for (const c of cardsFromIdeasMd(readFileSync(ideasMd, 'utf8'))) cards.push({ ...c, raw: c.description });
-  const postedToday = Object.values(state.ideas).filter((i) => (i.postedAt || '').startsWith(new Date().toISOString().slice(0, 10))).length;
+  const postedToday = Object.values(state.ideas).filter((i) => i.source !== 'ebook' && (i.postedAt || '').startsWith(new Date().toISOString().slice(0, 10))).length;
   const room = Math.max(0, (cfg.scouts.maxPerDay || 8) - postedToday);
   const fresh = selectNewCards(cards, state.ideas, { minSignal: cfg.scouts.minSignal }).slice(0, Math.min(cfg.scouts.maxPerTick || 3, room));
   if (!fresh.length) return;
@@ -104,6 +104,24 @@ async function syncIdeas() {
       if (state.ideas[c.key].retries >= 3) state.ideas[c.key].issueId = 'gave-up';
       save();
     }
+  }
+}
+
+// Ebook ideas arrive as complete cards: no enrich call, no logo, and their own daily cap.
+async function syncEbooks() {
+  const es = loadJson(home(cfg.scouts.ebookState), null);
+  if (!es) return;
+  const cards = Object.values(es.ideas || {}).map(cardFromEbook);
+  const postedToday = Object.values(state.ideas).filter((i) => i.source === 'ebook' && (i.postedAt || '').startsWith(new Date().toISOString().slice(0, 10))).length;
+  const fresh = selectNewCards(cards, state.ideas, { minSignal: cfg.scouts.minSignal }).slice(0, Math.max(0, (cfg.scouts.ebookMaxPerDay ?? 3) - postedToday));
+  for (const c of fresh) {
+    if (DRY) { log(`  would post: [${c.signal}] ${c.title}`); continue; }
+    const issue = await L.createIssue({ teamId: IDEAS.id, title: c.title, description: c.description, stateId: stateId('ideas', 'Ideation'), labelIds: c.labels.map(labelId).filter(Boolean), priority: c.verdict === 'write' ? 2 : c.priority });
+    state.ideas[c.key] = { issueId: issue.id, identifier: issue.identifier, source: 'ebook', signal: c.signal, verdict: c.verdict, postedAt: new Date().toISOString() };
+    reg(issue, { kind: 'ebook', key: c.key, lastStateSeen: 'Ideation', enriched: true });
+    save();
+    log(`  posted ${issue.identifier}: ${c.title}`);
+    await notifySlack(`:books: *${issue.identifier}* ${c.title}\nverdict: ${c.verdict} · signal: ${c.signal} · ${issue.url}`, log);
   }
 }
 
@@ -151,6 +169,7 @@ async function triageTask(issue) {
 async function applyActions(issue, board, actions, rec) {
   for (const a of actions) {
     try {
+      if (isEbook(issue) && (a.type === 'resume' || (a.type === 'move' && !['Parked', 'Ideation'].includes(a.state)))) { log(`  ignored ${a.type} on ebook card ${issue.identifier}`); continue; }
       if (a.type === 'move' && a.state) {
         if (!lin.teams[board].states[a.state]) { log(`  ignored move to unknown state ${a.state}`); continue; }
         await move(issue, board, a.state);
@@ -227,7 +246,7 @@ async function pollIssues() {
       if (/^Apple sign-in code needed/.test(issue.title)) continue; // opened by bin/apple-2fa-code.mjs
       log(`new ${board} issue ${issue.identifier} "${issue.title}" in ${st}`);
       if (DRY) continue;
-      if (board === 'ideas' && !rec.enriched && ['Ideation', 'Research', 'Implement'].includes(st)) await enrichOwnIdea(issue).catch((e) => log(`  enrich failed: ${e.message}`));
+      if (board === 'ideas' && !rec.enriched && !isEbook(issue) && ['Ideation', 'Research', 'Implement'].includes(st)) await enrichOwnIdea(issue).catch((e) => log(`  enrich failed: ${e.message}`));
       if (board === 'apps') await triageAppRequest(issue).catch((e) => log(`  triage failed: ${e.message}`));
     }
     if (rec.lastStateSeen !== st) {
@@ -243,6 +262,11 @@ async function pollIssues() {
 
 async function onStateChange(issue, board, st, rec) {
   if (board === 'ideas') {
+    if (isEbook(issue) && ['Research', 'Implement', 'Building', 'Needs you', 'Store review'].includes(st)) {
+      await move(issue, board, 'Ideation', 'This is an ebook idea, so the app pipeline does not run for it and I moved it back to **Ideation**. To have it written, open an issue on the Apps & tasks board.');
+      rec.lastStateSeen = 'Ideation';
+      return;
+    }
     if (st === 'Research') {
       if (unitActive(issue)) return;
       await comment(issue, '🔬 Research started: both stores, demand and volume, name/trademark, official sources, 4.3(a) concept test. Usually 30–60 min; the scorecard lands here and the card goes back to **Ideation** (or **Parked** on a kill).');
@@ -373,7 +397,7 @@ async function pollTasks() {
 // ---- main loop --------------------------------------------------------------------------------
 async function tick() {
   const t0 = Date.now();
-  for (const [name, fn] of [['issues', pollIssues], ['comments', pollComments], ['pipelines', pollPipelines], ['tasks', pollTasks], ['nightly', pollNightlyResults], ['ideas', syncIdeas]]) {
+  for (const [name, fn] of [['issues', pollIssues], ['comments', pollComments], ['pipelines', pollPipelines], ['tasks', pollTasks], ['nightly', pollNightlyResults], ['ideas', syncIdeas], ['ebooks', syncEbooks]]) {
     try { await fn(); } catch (e) { log(`${name}: ${e.message}`); }
   }
   state.lastTick = new Date().toISOString(); save();

@@ -18,6 +18,8 @@ Zero npm dependencies. Node ≥ 22. Runs as a systemd **user** service on the ho
 | **Store review** | the pipeline | Submitted. Checked every 30 min; → **Live** when both stores are live, → **Needs you** on a rejection. |
 | **Live** / **Parked** | | |
 
+**Ebook ideas** share this board with the label `ebook`: `reddit-scout`'s daily ebook scout writes complete cards (no enrich call, no logo, max 3 a day). Comment or Park them. **Research, Implement and Building never run the app pipeline for them**: the bridge moves the card back to Ideation, and `launchPipeline` refuses as a second guard. To write one, open an issue on the `APP` board.
+
 ### `APP` — Apps & tasks
 
 Two kinds of issue, one board (Linear's free plan allows two teams):
